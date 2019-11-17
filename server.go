@@ -10,7 +10,7 @@ func main() {
 	log.Println("tagger backend")
 
 	mux := http.NewServeMux()
-	mux.Handle("/login", requireAuth(http.HandlerFunc(loginHandler)))
+	mux.Handle("/auth/test", requireAuth(http.HandlerFunc(authTestHandler)))
 	mux.Handle("/posts/dates", requireAuth(http.HandlerFunc(postDatesHandler)))
 
 	handler := cors.Default().Handler(mux)

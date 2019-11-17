@@ -40,15 +40,15 @@ func authedPinboard(w http.ResponseWriter, r *http.Request) *pinboard.Pinboard {
 	return p
 }
 
-func loginHandler(w http.ResponseWriter, r *http.Request) {
+func authTestHandler(w http.ResponseWriter, r *http.Request) {
 	p := authedPinboard(w, r)
 
 	lu, err := p.PostsUpdated()
 	if err != nil {
-		msg := fmt.Sprintf("login failed %v", err.Error())
+		msg := fmt.Sprintf("Authentication failed %v", err.Error())
 		http.Error(w, msg, http.StatusUnauthorized)
 		return
 	}
 
-	fmt.Fprintf(w, "Login OK, posts last updated %s", lu)
+	fmt.Fprintf(w, "Authentication OK, posts for user %s last updated %s", p.User, lu)
 }
