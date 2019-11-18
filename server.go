@@ -13,6 +13,10 @@ func main() {
 	mux.Handle("/auth/test", requireAuth(http.HandlerFunc(authTestHandler)))
 	mux.Handle("/posts/dates", requireAuth(http.HandlerFunc(postDatesHandler)))
 
-	handler := cors.Default().Handler(mux)
+	c := cors.New(cors.Options{
+		AllowedHeaders: []string{"Pinboard-Auth"},
+	})
+
+	handler := c.Handler(mux)
 	http.ListenAndServe(":4567", handler)
 }
