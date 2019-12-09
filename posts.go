@@ -37,7 +37,8 @@ func postsGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(po)
 	if err != nil {
-		http.Error(w, "Failed to encode Posts as JSON", http.StatusInternalServerError)
+		msg := fmt.Sprintf("Failed to encode Posts as JSON: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 }
@@ -54,7 +55,8 @@ func postDatesHandler(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(pd)
 	if err != nil {
-		http.Error(w, "Failed to encode PostDates as JSON", http.StatusInternalServerError)
+		msg := fmt.Sprintf("Failed to encode Posts as JSON: %v", err)
+		http.Error(w, msg, http.StatusInternalServerError)
 		return
 	}
 }
