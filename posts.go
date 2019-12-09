@@ -85,7 +85,7 @@ func updatePost(w http.ResponseWriter, r *http.Request, po pinboard.Post) error 
 	return nil
 }
 
-func postDeleteTag(w http.ResponseWriter, r *http.Request) {
+func postDeleteTagHandler(w http.ResponseWriter, r *http.Request) {
 	po, err := postByUrl(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -110,7 +110,7 @@ func postDeleteTag(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Removed tag: %s from URL: %s", t, r.FormValue("url"))
 }
 
-func postAddTag(w http.ResponseWriter, r *http.Request) {
+func postAddTagHandler(w http.ResponseWriter, r *http.Request) {
 	po, err := postByUrl(w, r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)

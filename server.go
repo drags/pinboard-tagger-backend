@@ -14,8 +14,8 @@ func main() {
 	mux.HandleFunc("/posts/dates", requireAuth(postDatesHandler))
 	mux.HandleFunc("/posts/get", requireAuth(postsGetHandler))
 	mux.HandleFunc("/tags/get", requireAuth(tagsGetHandler))
-	mux.HandleFunc("/posts/deleteTag", requireAuth(postDeleteTag))
-	mux.HandleFunc("/posts/addTag", requireAuth(postAddTag))
+	mux.HandleFunc("/posts/deleteTag", requireAuth(postDeleteTagHandler))
+	mux.HandleFunc("/posts/addTag", requireAuth(postAddTagHandler))
 
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"Pinboard-Auth"},
