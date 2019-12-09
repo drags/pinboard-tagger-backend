@@ -66,14 +66,12 @@ func postByUrl(w http.ResponseWriter, r *http.Request) (pinboard.Post, error) {
 	u := r.FormValue("url")
 	t := r.FormValue("tag")
 	if len(u) < 1 || len(t) < 1 {
-		http.Error(w, "Both `url` and `tag` parameters are required", http.StatusBadRequest)
+		return pinboard.Post{}, errors.New("Both `url` and `tag` parameters are required")
 	}
 	pf := pinboard.PostsFilter{Url: u}
 	tmp, err := p.PostsGet(pf)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to retrieve post: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return pinboard.Post{}, errors.New(msg)
+		return pinboard.Post{}, fmt.Errorf("Failed to retrieve post: %v", err)
 	}
 	return tmp[0], nil
 }
@@ -82,9 +80,7 @@ func updatePost(w http.ResponseWriter, r *http.Request, po pinboard.Post) error 
 	p := authedPinboard(w, r)
 	err := p.PostsAdd(po, false, false)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to update post: %v", err)
-		http.Error(w, msg, http.StatusInternalServerError)
-		return errors.New(msg)
+		return fmt.Errorf("Failed to update post: %v", err)
 	}
 	return nil
 }
@@ -92,6 +88,7 @@ func updatePost(w http.ResponseWriter, r *http.Request, po pinboard.Post) error 
 func postDeleteTag(w http.ResponseWriter, r *http.Request) {
 	po, err := postByUrl(w, r)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -106,6 +103,7 @@ func postDeleteTag(w http.ResponseWriter, r *http.Request) {
 
 	err = updatePost(w, r, po)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -113,19 +111,20 @@ func postDeleteTag(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAddTag(w http.ResponseWriter, r *http.Request) {
-	u := r.FormValue("url")
-	t := r.FormValue("tag")
 	po, err := postByUrl(w, r)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	t := r.FormValue("tag")
 	po.Tags = append(po.Tags, t)
 
 	err = updatePost(w, r, po)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintf(w, "Added tag: %s from URL: %s", t, u)
+	fmt.Fprintf(w, "Added tag: %s from URL: %s", t, r.FormValue("url"))
 }
