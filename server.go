@@ -10,11 +10,12 @@ func main() {
 	log.Println("tagger backend")
 
 	mux := http.NewServeMux()
-	mux.Handle("/auth/test", requireAuth(http.HandlerFunc(authTestHandler)))
-	mux.Handle("/posts/dates", requireAuth(http.HandlerFunc(postDatesHandler)))
-	mux.Handle("/posts/get", requireAuth(http.HandlerFunc(postsGetHandler)))
-	mux.Handle("/posts/deleteTag", requireAuth(http.HandlerFunc(postDeleteTag)))
-	mux.Handle("/posts/addTag", requireAuth(http.HandlerFunc(postAddTag)))
+	mux.HandleFunc("/auth/test", requireAuth(authTestHandler))
+	mux.HandleFunc("/posts/dates", requireAuth(postDatesHandler))
+	mux.HandleFunc("/posts/get", requireAuth(postsGetHandler))
+	mux.HandleFunc("/tags/get", requireAuth(tagsGetHandler))
+	mux.HandleFunc("/posts/deleteTag", requireAuth(postDeleteTag))
+	mux.HandleFunc("/posts/addTag", requireAuth(postAddTag))
 
 	c := cors.New(cors.Options{
 		AllowedHeaders: []string{"Pinboard-Auth"},

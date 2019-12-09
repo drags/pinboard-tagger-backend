@@ -12,8 +12,8 @@ import (
 // previous format keys. Auth against the Pinboard API is _explicitly_ not done here
 // to avoid adding an extra API call to every request. Auth issues are handled by
 // pinboard.get
-func requireAuth(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func requireAuth(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		auth := r.Header.Get("Pinboard-Auth")
 		authInfo := strings.Split(auth, ":")
 		if len(authInfo) != 2 {
@@ -28,8 +28,8 @@ func requireAuth(h http.Handler) http.Handler {
 			http.Error(w, msg.Error(), http.StatusUnauthorized)
 			return
 		}
-		h.ServeHTTP(w, r)
-	})
+		f(w, r)
+	}
 }
 
 func authedPinboard(w http.ResponseWriter, r *http.Request) *pinboard.Pinboard {
