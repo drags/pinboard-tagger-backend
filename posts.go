@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/drags/pinboard"
 	"net/http"
@@ -61,32 +60,9 @@ func postDatesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func postByUrl(w http.ResponseWriter, r *http.Request) (pinboard.Post, error) {
-	p := authedPinboard(w, r)
-	u := r.FormValue("url")
-	t := r.FormValue("tag")
-	if len(u) < 1 || len(t) < 1 {
-		return pinboard.Post{}, errors.New("Both `url` and `tag` parameters are required")
-	}
-	pf := pinboard.PostsFilter{Url: u}
-	tmp, err := p.PostsGet(pf)
-	if err != nil {
-		return pinboard.Post{}, fmt.Errorf("Failed to retrieve post: %v", err)
-	}
-	return tmp[0], nil
-}
-
-func updatePost(w http.ResponseWriter, r *http.Request, po pinboard.Post) error {
-	p := authedPinboard(w, r)
-	err := p.PostsAdd(po, false, false)
-	if err != nil {
-		return fmt.Errorf("Failed to update post: %v", err)
-	}
-	return nil
-}
-
 func postDeleteTagHandler(w http.ResponseWriter, r *http.Request) {
-	po, err := postByUrl(w, r)
+	p := authedPinboard(w, r)
+	po, err := postByUrl(p, r.FormValue("url"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -101,7 +77,7 @@ func postDeleteTagHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	po.Tags = newTags
 
-	err = updatePost(w, r, po)
+	err = updatePost(p, po)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -111,7 +87,8 @@ func postDeleteTagHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAddTagHandler(w http.ResponseWriter, r *http.Request) {
-	po, err := postByUrl(w, r)
+	p := authedPinboard(w, r)
+	po, err := postByUrl(p, r.FormValue("url"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -120,11 +97,28 @@ func postAddTagHandler(w http.ResponseWriter, r *http.Request) {
 	t := r.FormValue("tag")
 	po.Tags = append(po.Tags, t)
 
-	err = updatePost(w, r, po)
+	err = updatePost(p, po)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	fmt.Fprintf(w, "Added tag: %s from URL: %s", t, r.FormValue("url"))
+}
+
+func postByUrl(p *pinboard.Pinboard, u string) (pinboard.Post, error) {
+	pf := pinboard.PostsFilter{Url: u}
+	tmp, err := p.PostsGet(pf)
+	if err != nil {
+		return pinboard.Post{}, fmt.Errorf("Failed to retrieve post: %v", err)
+	}
+	return tmp[0], nil
+}
+
+func updatePost(p *pinboard.Pinboard, po pinboard.Post) error {
+	err := p.PostsAdd(po, false, false)
+	if err != nil {
+		return fmt.Errorf("Failed to update post: %v", err)
+	}
+	return nil
 }
