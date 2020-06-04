@@ -1,13 +1,19 @@
 package main
 
 import (
+	"flag"
+	"github.com/gorilla/handlers"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
-	log.Println("tagger backend")
+	listenAddress := flag.String("listen", ":4567", "address:port for server to accept connections")
+	flag.Parse()
+
+	log.Println("Starting tagger-backend on", *listenAddress)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auth/test", requireAuth(authTestHandler))
@@ -21,6 +27,6 @@ func main() {
 		AllowedHeaders: []string{"Pinboard-Auth"},
 	})
 
-	handler := c.Handler(mux)
-	http.ListenAndServe(":4567", handler)
+	handler := handlers.CombinedLoggingHandler(os.Stdout, c.Handler(mux))
+	http.ListenAndServe(*listenAddress, handler)
 }
