@@ -4,6 +4,8 @@ COPY *.go ./
 RUN go get github.com/drags/pinboard
 RUN go get github.com/gorilla/handlers
 RUN go get github.com/rs/cors
+RUN go get github.com/honeycombio/beeline-go
+RUN go get github.com/felixge/httpsnoop
 RUN CGO_ENABLED=0 go build
 
 FROM alpine:latest

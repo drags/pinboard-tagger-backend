@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"github.com/gorilla/handlers"
+	"github.com/honeycombio/beeline-go"
+	"github.com/honeycombio/beeline-go/wrappers/hnynethttp"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
@@ -14,6 +16,12 @@ func main() {
 	flag.Parse()
 
 	log.Println("Starting tagger-backend on", *listenAddress)
+
+	beeline.Init(beeline.Config{
+		WriteKey:    "87752a6457c8e0d07d769d1ad7a728f9",
+		Dataset:     "pinboard-tagger",
+		ServiceName: "backend",
+	})
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auth/test", requireAuth(authTestHandler))
@@ -27,6 +35,7 @@ func main() {
 		AllowedHeaders: []string{"Pinboard-Auth"},
 	})
 
-	handler := handlers.CombinedLoggingHandler(os.Stdout, c.Handler(mux))
+	handler := hnynethttp.WrapHandler(mux)
+	handler = handlers.CombinedLoggingHandler(os.Stdout, c.Handler(handler))
 	http.ListenAndServe(*listenAddress, handler)
 }
